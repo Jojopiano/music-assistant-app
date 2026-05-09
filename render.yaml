@@ -1,0 +1,14 @@
+# 音樂小幫手前端 - Static Site
+services:
+  - type: static
+    name: music-assistant-app
+    runtime: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://music-xiaobangshou-api.onrender.com/api
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

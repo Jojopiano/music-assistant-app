@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API 測試 - 音樂小幫手</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { color: green; }
+        .error { color: red; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🎵 音樂小幫手 API 測試</h1>
+    
+    <div class="test-section">
+        <h2>API 設定</h2>
+        <label>API URL: <input type="text" id="apiUrl" value="http://localhost:3001/api" style="width: 300px;"></label>
+    </div>
+
+    <div class="test-section">
+        <h2>1. 健康檢查</h2>
+        <button onclick="testHealth()">測試連接</button>
+        <div id="healthResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. 登入測試</h2>
+        <label>Email: <input type="email" id="email" value="teacher@test.com"></label><br><br>
+        <label>密碼: <input type="password" id="password" value="123456"></label><br><br>
+        <button onclick="testLogin()">登入</button>
+        <div id="loginResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. 取得用戶資訊</h2>
+        <button onclick="testMe()">取得目前用戶</button>
+        <div id="meResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. 取得學生列表</h2>
+        <button onclick="testStudents()">取得學生</button>
+        <div id="studentsResult"></div>
+    </div>
+
+    <script>
+        let token = localStorage.getItem('test_token') || '';
+
+        function getApiUrl() {
+            return document.getElementById('apiUrl').value.replace(/\/$/, '');
+        }
+
+        async function testHealth() {
+            const resultDiv = document.getElementById('healthResult');
+            try {
+                const response = await fetch(getApiUrl().replace('/api', '') + '/health');
+                const data = await response.json();
+                resultDiv.innerHTML = `<p class="success">✅ 連接成功!</p><pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">❌ 連接失敗: ${error.message}</p>`;
+            }
+        }
+
+        async function testLogin() {
+            const resultDiv = document.getElementById('loginResult');
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch(getApiUrl() + '/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    token = data.data.token;
+                    localStorage.setItem('test_token', token);
+                    resultDiv.innerHTML = `<p class="success">✅ 登入成功!</p><pre>${JSON.stringify(data.data.user, null, 2)}</pre>`;
+                } else {
+                    resultDiv.innerHTML = `<p class="error">❌ 登入失敗: ${data.error}</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">❌ 錯誤: ${error.message}</p>`;
+            }
+        }
+
+        async function testMe() {
+            const resultDiv = document.getElementById('meResult');
+            if (!token) {
+                resultDiv.innerHTML = `<p class="error">❌ 請先登入</p>`;
+                return;
+            }
+
+            try {
+                const response = await fetch(getApiUrl() + '/auth/me', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                resultDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">❌ 錯誤: ${error.message}</p>`;
+            }
+        }
+
+        async function testStudents() {
+            const resultDiv = document.getElementById('studentsResult');
+            if (!token) {
+                resultDiv.innerHTML = `<p class="error">❌ 請先登入</p>`;
+                return;
+            }
+
+            try {
+                const response = await fetch(getApiUrl() + '/students', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                resultDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">❌ 錯誤: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
