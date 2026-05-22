@@ -208,7 +208,7 @@ export function LoginView({ onLogin, onRegister, onBack, onSocialLogin, defaultR
             )}
           </div>
 
-          {!isRegistering && (
+          {!isRegistering && import.meta.env.DEV && (
             <div className="text-center text-xs text-gray-400 space-y-1 mt-4">
               <p>測試帳號：</p>
               <p>老師：teacher@test.com / 123456</p>

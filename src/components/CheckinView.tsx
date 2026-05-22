@@ -1,16 +1,8 @@
 import { useState } from "react";
-import { COLORS, type Student } from "../data";
+import { COLORS, type Student, type AttendanceRecord } from "../data";
 import { Avatar } from "./Avatar";
 import { Badge } from "./Badge";
 import { Card } from "./Card";
-
-interface AttendanceRecord {
-  id: number;
-  studentId: number;
-  date: string;
-  teacherAction: "present" | "absent" | "confirmed" | null;
-  studentAction: "present" | "absent" | "confirmed" | null;
-}
 
 interface CheckinViewProps {
   attendance: AttendanceRecord[];

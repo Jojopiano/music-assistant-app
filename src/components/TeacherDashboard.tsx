@@ -12,6 +12,7 @@ import { ScheduleView } from "./ScheduleView";
 import { CheckinView } from "./CheckinView";
 import { ReportView } from "./ReportView";
 import { AddLessonsView } from "./AddLessonsView";
+import { NotificationsView } from "./NotificationsView";
 
 type Tab = "dashboard" | "schedule" | "checkin" | "lessons" | "addLessons" | "reports" | "notifications";
 
@@ -289,42 +290,11 @@ export function TeacherDashboard({ onBack, userName, userId }: TeacherDashboardP
         )}
 
         {activeTab === "notifications" && (
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold">通知中心</h2>
-
-            <div className="space-y-3">
-              {notifications
-                .filter(n => n.toRole === "teacher")
-                .map(notification => (
-                  <div
-                    key={notification.id}
-                    className={`card p-4 flex items-start gap-4 cursor-pointer transition-colors ${
-                      !notification.read ? "bg-purple-light/30" : ""
-                    }`}
-                    onClick={() => markNotificationRead(notification.id)}
-                  >
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                      notification.type === "warning" ? "bg-amber-light" :
-                      notification.type === "schedule" ? "bg-purple-light" :
-                      "bg-teal-light"
-                    }`}>
-                      {notification.type === "warning" ? <AlertCircle className="w-5 h-5 text-amber" /> :
-                       notification.type === "schedule" ? <Users className="w-5 h-5 text-purple" /> :
-                       <Bell className="w-5 h-5 text-teal" />}
-                    </div>
-                    <div className="flex-1">
-                      <p className={`text-sm ${!notification.read ? "font-medium" : ""}`}>
-                        {notification.text}
-                      </p>
-                      <span className="text-xs text-gray-400 mt-1">{notification.time}</span>
-                    </div>
-                    {!notification.read && (
-                      <div className="w-2 h-2 bg-purple rounded-full flex-shrink-0 mt-2" />
-                    )}
-                  </div>
-                ))}
-            </div>
-          </div>
+          <NotificationsView
+            notifications={notifications.filter(n => n.toRole === "teacher")}
+            onMarkRead={markNotificationRead}
+            role="teacher"
+          />
         )}
       </main>
     </div>

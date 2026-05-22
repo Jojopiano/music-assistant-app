@@ -142,11 +142,13 @@ function App() {
   return (
     <div>
       {/* API 狀態指示器 */}
-      <div className="fixed top-0 right-0 z-50 p-2">
-        <span className="text-xs bg-white/80 backdrop-blur px-2 py-1 rounded shadow">
-          {apiStatus}
-        </span>
-      </div>
+      {import.meta.env.DEV && (
+        <div className="fixed top-0 right-0 z-50 p-2">
+          <span className="text-xs bg-white/80 backdrop-blur px-2 py-1 rounded shadow">
+            {apiStatus}
+          </span>
+        </div>
+      )}
 
       {view === "home" && <RoleSelection onSelectRole={handleSelectRole} />}
 
