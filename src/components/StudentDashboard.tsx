@@ -1,9 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Bell, ChevronLeft, CheckCircle, AlertCircle, BookOpen, RotateCcw } from "lucide-react";
 import { format, isToday, isPast, parseISO } from "date-fns";
 import { zhTW } from "date-fns/locale";
-import type { Schedule, Notification, RescheduleRequest, AttendanceRecord } from "../data";
-import { initData } from "../data";
+import {
+  initData,
+  normalizeStudent, normalizeSchedule, normalizeNotification, normalizeAttendance, normalizeRescheduleRequest,
+  type Student, type Schedule, type Notification, type RescheduleRequest, type AttendanceRecord,
+} from "../data";
+import { useStudents, useLessons, useNotifications, useAttendance, useRescheduleRequests } from "../hooks/useApiData";
 import { Avatar } from "./Avatar";
 import { Badge } from "./Badge";
 import { Card } from "./Card";
@@ -21,6 +25,7 @@ interface StudentDashboardProps {
 
 export function StudentDashboard({ studentId, onBack, userName }: StudentDashboardProps) {
   const [activeTab, setActiveTab] = useState<Tab>("schedule");
+  const [students, setStudents] = useState<Student[]>(initData.students);
   const [schedule, setSchedule] = useState<Schedule[]>(initData.schedule);
   const [notifications, setNotifications] = useState<Notification[]>(initData.notifications);
   const [rescheduleRequests, setRescheduleRequests] = useState<RescheduleRequest[]>(initData.rescheduleRequests);
@@ -30,7 +35,44 @@ export function StudentDashboard({ studentId, onBack, userName }: StudentDashboa
   const [rescheduleTime, setRescheduleTime] = useState("");
   const [rescheduleReason, setRescheduleReason] = useState("");
 
-  const student = initData.students.find(s => s.id === studentId);
+  // Load real data from API; fall back to initData only if the API errors
+  const { students: apiStudents, loading: studentsLoading, error: studentsError } = useStudents();
+  const { lessons: apiLessons, loading: lessonsLoading, error: lessonsError } = useLessons({ studentId });
+  const { notifications: apiNotifications, loading: notificationsLoading, error: notificationsError } = useNotifications();
+  const { records: apiAttendance, loading: attendanceLoading, error: attendanceError } = useAttendance({ studentId });
+  const { requests: apiReschedule, loading: rescheduleLoading, error: rescheduleError } = useRescheduleRequests();
+
+  useEffect(() => {
+    if (!studentsLoading && studentsError === null) {
+      setStudents(apiStudents.map(normalizeStudent));
+    }
+  }, [apiStudents, studentsLoading, studentsError]);
+
+  useEffect(() => {
+    if (!lessonsLoading && lessonsError === null) {
+      setSchedule(apiLessons.map(normalizeSchedule));
+    }
+  }, [apiLessons, lessonsLoading, lessonsError]);
+
+  useEffect(() => {
+    if (!notificationsLoading && notificationsError === null) {
+      setNotifications(apiNotifications.map(normalizeNotification));
+    }
+  }, [apiNotifications, notificationsLoading, notificationsError]);
+
+  useEffect(() => {
+    if (!attendanceLoading && attendanceError === null) {
+      setAttendance(apiAttendance.map(normalizeAttendance));
+    }
+  }, [apiAttendance, attendanceLoading, attendanceError]);
+
+  useEffect(() => {
+    if (!rescheduleLoading && rescheduleError === null) {
+      setRescheduleRequests(apiReschedule.map(normalizeRescheduleRequest));
+    }
+  }, [apiReschedule, rescheduleLoading, rescheduleError]);
+
+  const student = students.find(s => s.id === studentId);
   const studentSchedule = schedule.filter(s => s.studentId === studentId);
   const studentNotifications = notifications.filter(n =>
     n.toRole === "student" && n.toStudentId === studentId
@@ -181,7 +223,7 @@ export function StudentDashboard({ studentId, onBack, userName }: StudentDashboa
           <div className="space-y-6">
             <ScheduleView
               schedule={schedule}
-              students={initData.students}
+              students={students}
               notifications={notifications}
               rescheduleRequests={rescheduleRequests}
               role="student"
@@ -289,7 +331,7 @@ export function StudentDashboard({ studentId, onBack, userName }: StudentDashboa
         {activeTab === "checkin" && (
           <CheckinView
             attendance={attendance}
-            students={initData.students}
+            students={students}
             role="student"
             studentId={studentId}
             onAttendanceChange={setAttendance}
@@ -356,7 +398,7 @@ export function StudentDashboard({ studentId, onBack, userName }: StudentDashboa
         {activeTab === "reports" && (
           <ReportView
             schedule={schedule}
-            students={initData.students}
+            students={students}
             attendance={attendance}
             role="student"
             studentId={studentId}

@@ -13,7 +13,7 @@ export interface Schedule {
   date: string;
   time: string;
   status: "pending_student" | "confirmed" | "reschedule_requested" | "cancelled";
-  duration: number;
+  duration: number | undefined;
 }
 
 export interface RescheduleRequest {
@@ -24,6 +24,7 @@ export interface RescheduleRequest {
   requestedTime: string;
   reason: string;
   status: "pending" | "accepted" | "rejected";
+  createdAt?: string;
 }
 
 export interface AttendanceRecord {
@@ -32,6 +33,7 @@ export interface AttendanceRecord {
   date: string;
   teacherAction: "present" | "absent" | "confirmed" | null;
   studentAction: "present" | "absent" | "confirmed" | null;
+  lessonId?: number;
 }
 
 export interface Notification {
@@ -103,3 +105,65 @@ export const initData: {
     { id: 5, toRole: "student", toStudentId: 4, text: "新課程已安排：5月19日 15:00 — 請確認", time: "1小時前", read: false, type: "schedule", lessonId: 7 },
   ],
 };
+
+// Normalizers: map API response field names to local TypeScript types.
+// Handles both camelCase and snake_case from the backend.
+
+export function normalizeStudent(a: any): Student {
+  return {
+    id: a.id,
+    name: a.name ?? '',
+    instrument: a.instrument ?? '',
+    lessonsTotal: a.lessonsTotal ?? a.lessons_total ?? 0,
+    lessonsUsed: a.lessonsUsed ?? a.lessons_used ?? 0,
+    avatar: a.avatar ?? (a.name ? (a.name as string).charAt(0) : '?'),
+  };
+}
+
+export function normalizeSchedule(a: any): Schedule {
+  return {
+    id: a.id,
+    studentId: a.studentId ?? a.student_id ?? 0,
+    date: a.date ?? a.lessonDate ?? a.lesson_date ?? '',
+    time: a.time ?? a.lessonTime ?? a.lesson_time ?? '',
+    status: a.status ?? 'pending_student',
+    duration: a.duration,
+  };
+}
+
+export function normalizeNotification(a: any): Notification {
+  return {
+    id: a.id,
+    toRole: a.toRole ?? a.to_role ?? 'teacher',
+    toStudentId: a.toStudentId ?? a.to_student_id,
+    text: a.text ?? a.message ?? '',
+    time: a.time ?? a.created_at ?? '',
+    read: a.read ?? a.is_read ?? false,
+    type: a.type ?? 'info',
+    lessonId: a.lessonId ?? a.lesson_id,
+  };
+}
+
+export function normalizeAttendance(a: any): AttendanceRecord {
+  return {
+    id: a.id,
+    studentId: a.studentId ?? a.student_id ?? 0,
+    date: a.date ?? a.recordDate ?? a.record_date ?? '',
+    teacherAction: a.teacherAction ?? a.teacher_action ?? null,
+    studentAction: a.studentAction ?? a.student_action ?? null,
+    lessonId: a.lessonId ?? a.lesson_id,
+  };
+}
+
+export function normalizeRescheduleRequest(a: any): RescheduleRequest {
+  return {
+    id: a.id,
+    lessonId: a.lessonId ?? a.lesson_id ?? 0,
+    studentId: a.studentId ?? a.student_id ?? 0,
+    requestedDate: a.requestedDate ?? a.requested_date ?? '',
+    requestedTime: a.requestedTime ?? a.requested_time ?? '',
+    reason: a.reason ?? '',
+    status: a.status ?? 'pending',
+    createdAt: a.createdAt ?? a.created_at,
+  };
+}

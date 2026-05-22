@@ -1,7 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Users, Bell, ChevronLeft, AlertCircle, BookOpen, CheckCircle } from "lucide-react";
-import { COLORS, type Student, type Schedule, type Notification, type RescheduleRequest, type AttendanceRecord } from "../data";
-import { initData } from "../data";
+import {
+  COLORS, initData,
+  normalizeStudent, normalizeSchedule, normalizeNotification, normalizeAttendance, normalizeRescheduleRequest,
+  type Student, type Schedule, type Notification, type RescheduleRequest, type AttendanceRecord,
+} from "../data";
+import { useStudents, useLessons, useNotifications, useAttendance, useRescheduleRequests } from "../hooks/useApiData";
 import { Avatar } from "./Avatar";
 import { Card } from "./Card";
 import { ScheduleView } from "./ScheduleView";
@@ -14,9 +18,10 @@ type Tab = "dashboard" | "schedule" | "checkin" | "lessons" | "addLessons" | "re
 interface TeacherDashboardProps {
   onBack: () => void;
   userName?: string;
+  userId?: number;
 }
 
-export function TeacherDashboard({ onBack, userName }: TeacherDashboardProps) {
+export function TeacherDashboard({ onBack, userName, userId }: TeacherDashboardProps) {
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const [students, setStudents] = useState<Student[]>(initData.students);
   const [schedule, setSchedule] = useState<Schedule[]>(initData.schedule);
@@ -24,9 +29,49 @@ export function TeacherDashboard({ onBack, userName }: TeacherDashboardProps) {
   const [rescheduleRequests, setRescheduleRequests] = useState<RescheduleRequest[]>(initData.rescheduleRequests);
   const [attendance, setAttendance] = useState<AttendanceRecord[]>(initData.attendance);
 
+  // Load real data from API; fall back to initData only if the API errors
+  const { students: apiStudents, loading: studentsLoading, error: studentsError } = useStudents();
+  // teacherId scoping is handled by JWT on the backend; pass undefined for now
+  // userId is available here for future use (e.g. filtering or audit logging)
+  const { lessons: apiLessons, loading: lessonsLoading, error: lessonsError } = useLessons(userId ? { teacherId: userId } as any : undefined);
+  const { notifications: apiNotifications, loading: notificationsLoading, error: notificationsError } = useNotifications();
+  const { records: apiAttendance, loading: attendanceLoading, error: attendanceError } = useAttendance(userId ? { teacherId: userId } as any : undefined);
+  const { requests: apiReschedule, loading: rescheduleLoading, error: rescheduleError } = useRescheduleRequests();
+
+  useEffect(() => {
+    if (!studentsLoading && studentsError === null) {
+      setStudents(apiStudents.map(normalizeStudent));
+    }
+  }, [apiStudents, studentsLoading, studentsError]);
+
+  useEffect(() => {
+    if (!lessonsLoading && lessonsError === null) {
+      setSchedule(apiLessons.map(normalizeSchedule));
+    }
+  }, [apiLessons, lessonsLoading, lessonsError]);
+
+  useEffect(() => {
+    if (!notificationsLoading && notificationsError === null) {
+      setNotifications(apiNotifications.map(normalizeNotification));
+    }
+  }, [apiNotifications, notificationsLoading, notificationsError]);
+
+  useEffect(() => {
+    if (!attendanceLoading && attendanceError === null) {
+      setAttendance(apiAttendance.map(normalizeAttendance));
+    }
+  }, [apiAttendance, attendanceLoading, attendanceError]);
+
+  useEffect(() => {
+    if (!rescheduleLoading && rescheduleError === null) {
+      setRescheduleRequests(apiReschedule.map(normalizeRescheduleRequest));
+    }
+  }, [apiReschedule, rescheduleLoading, rescheduleError]);
+
+  const today = new Date().toLocaleDateString('en-CA');
   const unreadCount = notifications.filter(n => !n.read && n.toRole === "teacher").length;
   const pendingRescheduleCount = rescheduleRequests.filter(r => r.status === "pending").length;
-  const todayLessons = schedule.filter(s => s.date === "2026-05-02").length;
+  const todayLessons = schedule.filter(s => s.date === today).length;
 
   const markNotificationRead = (id: number) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));

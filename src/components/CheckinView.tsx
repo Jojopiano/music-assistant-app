@@ -39,7 +39,7 @@ export function CheckinView({
   onNotificationsChange,
   notifications,
 }: CheckinViewProps) {
-  const [date, setDate] = useState("2026-05-02");
+  const [date, setDate] = useState(new Date().toLocaleDateString('en-CA'));
   const getRecord = (sid: number) => attendance.find((a) => a.studentId === sid && a.date === date);
 
   const act = (sid: number, action: "present" | "absent" | "confirmed") => {

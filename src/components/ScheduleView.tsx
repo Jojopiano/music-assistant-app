@@ -46,13 +46,14 @@ export function ScheduleView({
   onNotificationsChange,
   onRescheduleRequestsChange,
 }: ScheduleViewProps) {
+  const todayStr = new Date().toLocaleDateString('en-CA');
   const [viewMode, setViewMode] = useState<"week" | "month">("week");
-  const [anchor, setAnchor] = useState("2026-05-02");
-  const [selectedDate, setSelectedDate] = useState("2026-05-02");
+  const [anchor, setAnchor] = useState(todayStr);
+  const [selectedDate, setSelectedDate] = useState(todayStr);
   const [showAddForm, setShowAddForm] = useState(false);
   const [form, setForm] = useState({
     studentId: 1,
-    date: "2026-05-10",
+    date: todayStr,
     time: "10:00",
     duration: 60,
   });
