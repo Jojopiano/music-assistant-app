@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { COLORS, type Schedule, type Student, type Notification, type RescheduleRequest } from "../data";
+import { lessonsApi, rescheduleApi } from "../api/client";
 import { CalendarGrid } from "./CalendarGrid";
 import { DayDetail } from "./DayDetail";
 import { Card } from "./Card";
@@ -80,19 +81,16 @@ export function ScheduleView({
     setSelectedDate(date);
   };
 
-  const addLesson = () => {
+  const addLesson = async () => {
     const student = students.find((s) => s.id === Number(form.studentId));
     if (!student) return;
 
-    // 計算已排程數量
     const studentSchedule = schedule.filter((s) => s.studentId === student.id);
     const scheduledCount = studentSchedule.filter(
       (s) => s.status === "confirmed" || s.status === "pending_student" || s.status === "reschedule_requested"
     ).length;
-    
-    // 尚未排程的剩餘堂數
     const unscheduledRemaining = Math.max(0, student.lessonsTotal - student.lessonsUsed - scheduledCount);
-    
+
     if (unscheduledRemaining <= 0) {
       alert(`${student.name} 沒有尚未排程的課程堂數。請先新增課程堂數。`);
       return;
@@ -121,9 +119,20 @@ export function ScheduleView({
     };
     onNotificationsChange([...notifications, newNotification]);
     setShowAddForm(false);
+
+    try {
+      await lessonsApi.create({
+        studentId: Number(form.studentId),
+        lessonDate: form.date,
+        lessonTime: form.time,
+        duration: form.duration,
+      });
+    } catch (err) {
+      console.error("新增課程 API 失敗:", err);
+    }
   };
 
-  const teacherAction = (lessonId: number, action: "accept" | "reject") => {
+  const teacherAction = async (lessonId: number, action: "accept" | "reject") => {
     const req = rescheduleRequests.find(
       (r) => r.lessonId === lessonId && r.status === "pending"
     );
@@ -164,6 +173,21 @@ export function ScheduleView({
     onRescheduleRequestsChange(updatedReqs);
     onScheduleChange(updatedSchedule);
     onNotificationsChange([...notifications, newNotification]);
+
+    try {
+      await rescheduleApi.updateStatus(req.id, action === "accept" ? "accepted" : "rejected");
+      if (action === "accept") {
+        await lessonsApi.update(lessonId, {
+          lessonDate: req.requestedDate,
+          lessonTime: req.requestedTime,
+          status: "confirmed",
+        });
+      } else {
+        await lessonsApi.update(lessonId, { status: "confirmed" });
+      }
+    } catch (err) {
+      console.error("改期處理 API 失敗:", err);
+    }
   };
 
   const studentAction = (lessonId: number, action: "confirm" | "request_reschedule") => {
@@ -187,9 +211,9 @@ export function ScheduleView({
     }
   };
 
-  const submitReschedule = ({ date, time, reason }: { date: string; time: string; reason: string }) => {
+  const submitReschedule = async ({ date, time, reason }: { date: string; time: string; reason: string }) => {
     if (!rescheduleLesson) return;
-    
+
     const lesson = rescheduleLesson;
     const req: RescheduleRequest = {
       id: Date.now(),
@@ -200,31 +224,42 @@ export function ScheduleView({
       reason,
       status: "pending",
     };
-    
+
     const updatedSchedule = schedule.map((s) =>
       s.id === lesson.id ? { ...s, status: "reschedule_requested" as const } : s
     );
-    
+
     const st = students.find((s) => s.id === lesson.studentId);
     const notifText = role === "teacher"
       ? `老師申請改期 - ${st?.name}: ${lesson.date} · ${lesson.time} → ${date} · ${time}${reason ? ` (${reason})` : ""}`
       : `${st?.name} 申請改期: ${lesson.date} · ${lesson.time} → ${date} · ${time}${reason ? ` (${reason})` : ""}`;
-    
+
     const newNotification: Notification = {
       id: Date.now() + 1,
       toRole: role === "teacher" ? "student" : "teacher",
       toStudentId: role === "teacher" ? lesson.studentId : undefined,
       text: notifText,
-      time: "Just now",
+      time: "剛剛",
       read: false,
       type: "reschedule",
       lessonId: lesson.id,
     };
-    
+
     onRescheduleRequestsChange([...rescheduleRequests, req]);
     onScheduleChange(updatedSchedule);
     onNotificationsChange([...notifications, newNotification]);
     setRescheduleLesson(null);
+
+    try {
+      await rescheduleApi.create({
+        lessonId: lesson.id,
+        requestedDate: date,
+        requestedTime: time,
+        reason: reason || undefined,
+      });
+    } catch (err) {
+      console.error("申請改期 API 失敗:", err);
+    }
   };
 
   return (

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { COLORS, type Student, type AttendanceRecord } from "../data";
+import { attendanceApi } from "../api/client";
 import { Avatar } from "./Avatar";
 import { Badge } from "./Badge";
 import { Card } from "./Card";
@@ -34,10 +35,10 @@ export function CheckinView({
   const [date, setDate] = useState(new Date().toLocaleDateString('en-CA'));
   const getRecord = (sid: number) => attendance.find((a) => a.studentId === sid && a.date === date);
 
-  const act = (sid: number, action: "present" | "absent" | "confirmed") => {
+  const act = async (sid: number, action: "present" | "absent" | "confirmed") => {
     const existing = getRecord(sid);
     const field = role === "teacher" ? "teacherAction" : "studentAction";
-    
+
     let updatedAttendance: AttendanceRecord[];
     if (existing) {
       updatedAttendance = attendance.map((a) =>
@@ -55,8 +56,23 @@ export function CheckinView({
         },
       ];
     }
-    
+
     onAttendanceChange(updatedAttendance);
+
+    try {
+      if (existing) {
+        await attendanceApi.update(existing.id, { [field]: action });
+      } else {
+        await attendanceApi.create({
+          studentId: sid,
+          recordDate: date,
+          teacherAction: role === "teacher" ? action : undefined,
+          studentAction: role === "student" ? action : undefined,
+        });
+      }
+    } catch (err) {
+      console.error("打卡 API 失敗:", err);
+    }
 
     // Notify the other party
     const student = students.find((s) => s.id === sid);
