@@ -135,10 +135,10 @@ export const rescheduleApi = {
   getAll: () =>
     request<{ success: boolean; data: { requests: any[] } }>('/reschedule'),
 
-  create: (request: { lessonId: number; requestedDate: string; requestedTime: string; reason?: string }) =>
+  create: (payload: { lessonId: number; requestedDate: string; requestedTime: string; reason?: string }) =>
     request<{ success: boolean; data: { request: any } }>('/reschedule', {
       method: 'POST',
-      body: JSON.stringify(request),
+      body: JSON.stringify(payload),
     }),
 
   updateStatus: (id: number, status: 'accepted' | 'rejected') =>

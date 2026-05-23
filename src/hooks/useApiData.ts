@@ -12,7 +12,7 @@ export function useStudents() {
       setLoading(true);
       const response = await studentsApi.getAll();
       if (response.success) {
-        setStudents(response.data.students);
+        setStudents(response.data?.students ?? []);
       }
     } catch (err) {
       setError((err as Error).message);
@@ -39,7 +39,7 @@ export function useLessons(params?: { studentId?: number; dateFrom?: string; dat
       setLoading(true);
       const response = await lessonsApi.getAll(params);
       if (response.success) {
-        setLessons(response.data.lessons);
+        setLessons(response.data?.lessons ?? []);
       }
     } catch (err) {
       setError((err as Error).message);
@@ -66,7 +66,7 @@ export function useNotifications() {
       setLoading(true);
       const response = await notificationsApi.getAll();
       if (response.success) {
-        setNotifications(response.data.notifications);
+        setNotifications(response.data?.notifications ?? []);
       }
     } catch (err) {
       setError((err as Error).message);
@@ -102,7 +102,7 @@ export function useAttendance(params?: { studentId?: number; dateFrom?: string; 
       setLoading(true);
       const response = await attendanceApi.getAll(params);
       if (response.success) {
-        setRecords(response.data.records);
+        setRecords(response.data?.records ?? []);
       }
     } catch (err) {
       setError((err as Error).message);
@@ -129,7 +129,7 @@ export function useRescheduleRequests() {
       setLoading(true);
       const response = await rescheduleApi.getAll();
       if (response.success) {
-        setRequests(response.data.requests);
+        setRequests(response.data?.requests ?? []);
       }
     } catch (err) {
       setError((err as Error).message);
