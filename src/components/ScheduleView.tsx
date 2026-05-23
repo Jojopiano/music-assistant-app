@@ -66,7 +66,7 @@ export function ScheduleView({
     } else {
       d.setMonth(d.getMonth() + dir);
     }
-    setAnchor(d.toISOString().slice(0, 10));
+    setAnchor(d.toLocaleDateString('en-CA'));
   };
 
   const label = viewMode === "week" ? fmtWeekRange(getWeekDates(anchor)) : fmtMonth(anchor);

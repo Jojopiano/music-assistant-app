@@ -45,7 +45,7 @@ export function CalendarGrid({
     (byDate[sc.date] = byDate[sc.date] || []).push(sc);
   });
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = new Date().toLocaleDateString('en-CA');
 
   if (viewMode === "week") {
     return (

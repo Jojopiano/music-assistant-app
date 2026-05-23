@@ -45,31 +45,31 @@ export function StudentDashboard({ studentId, onBack, userName }: StudentDashboa
 
   useEffect(() => {
     if (!studentsLoading && studentsError === null) {
-      setStudents(apiStudents.map(normalizeStudent));
+      setStudents((apiStudents ?? []).map(normalizeStudent));
     }
   }, [apiStudents, studentsLoading, studentsError]);
 
   useEffect(() => {
     if (!lessonsLoading && lessonsError === null) {
-      setSchedule(apiLessons.map(normalizeSchedule));
+      setSchedule((apiLessons ?? []).map(normalizeSchedule));
     }
   }, [apiLessons, lessonsLoading, lessonsError]);
 
   useEffect(() => {
     if (!notificationsLoading && notificationsError === null) {
-      setNotifications(apiNotifications.map(normalizeNotification));
+      setNotifications((apiNotifications ?? []).map(normalizeNotification));
     }
   }, [apiNotifications, notificationsLoading, notificationsError]);
 
   useEffect(() => {
     if (!attendanceLoading && attendanceError === null) {
-      setAttendance(apiAttendance.map(normalizeAttendance));
+      setAttendance((apiAttendance ?? []).map(normalizeAttendance));
     }
   }, [apiAttendance, attendanceLoading, attendanceError]);
 
   useEffect(() => {
     if (!rescheduleLoading && rescheduleError === null) {
-      setRescheduleRequests(apiReschedule.map(normalizeRescheduleRequest));
+      setRescheduleRequests((apiReschedule ?? []).map(normalizeRescheduleRequest));
     }
   }, [apiReschedule, rescheduleLoading, rescheduleError]);
 

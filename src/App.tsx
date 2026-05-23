@@ -52,7 +52,7 @@ function App() {
 
       try {
         const response = await authApi.me();
-        if (response.success && response.data.user) {
+        if (response.success && response.data?.user) {
           const userData = response.data.user;
           setUser(userData);
           setRole(userData.role);
@@ -89,7 +89,7 @@ function App() {
     try {
       const response = await authApi.login(email, password);
       if (response.success) {
-        const { token, user: userData } = response.data;
+        const { token, user: userData } = response.data ?? {};
         setToken(token);
         setUser(userData);
         setRole(userData.role);
@@ -104,7 +104,7 @@ function App() {
     try {
       const response = await authApi.register(name, email, password, registerRole);
       if (response.success) {
-        const { token, user: userData } = response.data;
+        const { token, user: userData } = response.data ?? {};
         setToken(token);
         setUser(userData);
         setRole(userData.role);
