@@ -6,9 +6,10 @@ import { TeacherDashboard } from "./components/TeacherDashboard";
 import { StudentDashboard } from "./components/StudentDashboard";
 import { TeacherSettings } from "./components/TeacherSettings";
 import { PairingConfirmPage } from "./components/PairingConfirmPage";
+import { InviteLandingPage, getPendingInviteCode, clearPendingInviteCode } from "./components/InviteLandingPage";
 import { authApi, setToken, clearToken, getToken } from "./api/client";
 
-type View = "home" | "socialLogin" | "login" | "dashboard" | "settings" | "pairing";
+type View = "home" | "socialLogin" | "login" | "dashboard" | "settings" | "pairing" | "inviteLanding";
 
 interface User {
   id: number;
@@ -25,6 +26,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [apiStatus, setApiStatus] = useState<string>("檢查中...");
   const [pairingCode, setPairingCode] = useState<string | undefined>(undefined);
+  const [inviteCode, setInviteCode] = useState<string | undefined>(undefined);
 
   // 檢查 API 連接
   useEffect(() => {
@@ -96,7 +98,16 @@ function App() {
         setToken(token);
         setUser(userData);
         setRole(userData.role);
-        setView("dashboard");
+
+        // 檢查是否有保留的邀請代碼
+        const pendingCode = getPendingInviteCode();
+        if (pendingCode) {
+          clearPendingInviteCode();
+          setInviteCode(pendingCode);
+          setView("inviteLanding");
+        } else {
+          setView("dashboard");
+        }
       }
     } catch (error) {
       alert("登入失敗：" + (error as Error).message);
@@ -111,7 +122,16 @@ function App() {
         setToken(token);
         setUser(userData);
         setRole(userData.role);
-        setView("dashboard");
+
+        // 檢查是否有保留的邀請代碼
+        const pendingCode = getPendingInviteCode();
+        if (pendingCode) {
+          clearPendingInviteCode();
+          setInviteCode(pendingCode);
+          setView("inviteLanding");
+        } else {
+          setView("dashboard");
+        }
       }
     } catch (error) {
       alert("註冊失敗：" + (error as Error).message);
@@ -139,6 +159,17 @@ function App() {
   const handleOpenPairing = (code: string) => {
     setPairingCode(code);
     setView("pairing");
+  };
+
+  const handleOpenInviteLanding = (code: string) => {
+    setInviteCode(code);
+    setView("inviteLanding");
+  };
+
+  const handleNavigateToLoginWithCode = (code: string) => {
+    setInviteCode(code);
+    setRole("student");
+    setView("login");
   };
 
   if (isLoading) {
@@ -211,6 +242,19 @@ function App() {
               setRole("student");
             }
           }}
+        />
+      )}
+
+      {view === "inviteLanding" && inviteCode && (
+        <InviteLandingPage
+          code={inviteCode}
+          isLoggedIn={!!user}
+          onNavigateToLogin={handleNavigateToLoginWithCode}
+          onNavigateToPairing={(code) => {
+            setPairingCode(code);
+            setView("pairing");
+          }}
+          onNavigateHome={() => setView("home")}
         />
       )}
     </div>
