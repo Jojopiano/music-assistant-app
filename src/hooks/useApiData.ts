@@ -82,7 +82,7 @@ export function useNotifications() {
   const markAsRead = async (id: number) => {
     try {
       await notificationsApi.markAsRead(id);
-      setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
     } catch (err) {
       console.error('Mark as read failed:', err);
     }
