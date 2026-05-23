@@ -190,7 +190,7 @@ export function ScheduleView({
     }
   };
 
-  const studentAction = (lessonId: number, action: "confirm" | "request_reschedule") => {
+  const studentAction = async (lessonId: number, action: "confirm" | "request_reschedule") => {
     if (action === "confirm") {
       const lesson = schedule.find((s) => s.id === lessonId);
       const student = students.find((s) => s.id === studentId);
@@ -208,6 +208,12 @@ export function ScheduleView({
         type: "success",
       };
       onNotificationsChange([...notifications, newNotification]);
+
+      try {
+        await lessonsApi.update(lessonId, { status: "confirmed" });
+      } catch (err) {
+        console.error("確認課程 API 失敗:", err);
+      }
     }
   };
 

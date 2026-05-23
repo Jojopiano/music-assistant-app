@@ -6,6 +6,7 @@ import {
   type Student, type Schedule, type Notification, type RescheduleRequest, type AttendanceRecord,
 } from "../data";
 import { useStudents, useLessons, useNotifications, useAttendance, useRescheduleRequests } from "../hooks/useApiData";
+import { lessonsApi, notificationsApi } from "../api/client";
 import { Avatar } from "./Avatar";
 import { Card } from "./Card";
 import { ScheduleView } from "./ScheduleView";
@@ -72,8 +73,13 @@ export function TeacherDashboard({ onBack, userName, userId }: TeacherDashboardP
   const pendingRescheduleCount = rescheduleRequests.filter(r => r.status === "pending").length;
   const todayLessons = schedule.filter(s => s.date === today).length;
 
-  const markNotificationRead = (id: number) => {
+  const markNotificationRead = async (id: number) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+    try {
+      await notificationsApi.markAsRead(id);
+    } catch (err) {
+      console.error("標記通知已讀 API 失敗:", err);
+    }
   };
 
   const tabs = [
@@ -212,10 +218,15 @@ export function TeacherDashboard({ onBack, userName, userId }: TeacherDashboardP
           <AddLessonsView
             students={students}
             schedule={schedule}
-            onAddLessons={(studentId, amount) => {
-              setStudents(prev => prev.map(s => 
+            onAddLessons={async (studentId, amount) => {
+              setStudents(prev => prev.map(s =>
                 s.id === studentId ? { ...s, lessonsTotal: s.lessonsTotal + amount } : s
               ));
+              try {
+                await lessonsApi.addCredits(studentId, amount);
+              } catch (err) {
+                console.error("新增堂數 API 失敗:", err);
+              }
             }}
           />
         )}

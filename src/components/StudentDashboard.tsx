@@ -8,6 +8,7 @@ import {
   type Student, type Schedule, type Notification, type RescheduleRequest, type AttendanceRecord,
 } from "../data";
 import { useStudents, useLessons, useNotifications, useAttendance, useRescheduleRequests } from "../hooks/useApiData";
+import { notificationsApi } from "../api/client";
 import { Avatar } from "./Avatar";
 import { Badge } from "./Badge";
 import { Card } from "./Card";
@@ -138,8 +139,13 @@ export function StudentDashboard({ studentId, onBack, userName }: StudentDashboa
     setRescheduleReason("");
   };
 
-  const markNotificationRead = (id: number) => {
+  const markNotificationRead = async (id: number) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+    try {
+      await notificationsApi.markAsRead(id);
+    } catch (err) {
+      console.error("標記通知已讀 API 失敗:", err);
+    }
   };
 
   const upcomingLessons = studentSchedule
