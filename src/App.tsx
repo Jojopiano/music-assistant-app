@@ -4,9 +4,11 @@ import { LoginView } from "./components/LoginView";
 import { SocialLogin } from "./components/SocialLogin";
 import { TeacherDashboard } from "./components/TeacherDashboard";
 import { StudentDashboard } from "./components/StudentDashboard";
+import { TeacherSettings } from "./components/TeacherSettings";
+import { PairingConfirmPage } from "./components/PairingConfirmPage";
 import { authApi, setToken, clearToken, getToken } from "./api/client";
 
-type View = "home" | "socialLogin" | "login" | "dashboard";
+type View = "home" | "socialLogin" | "login" | "dashboard" | "settings" | "pairing";
 
 interface User {
   id: number;
@@ -22,6 +24,7 @@ function App() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [apiStatus, setApiStatus] = useState<string>("檢查中...");
+  const [pairingCode, setPairingCode] = useState<string | undefined>(undefined);
 
   // 檢查 API 連接
   useEffect(() => {
@@ -126,6 +129,16 @@ function App() {
     setView("home");
     setRole(null);
     setUser(null);
+    setPairingCode(undefined);
+  };
+
+  const handleOpenSettings = () => {
+    setView("settings");
+  };
+
+  const handleOpenPairing = (code: string) => {
+    setPairingCode(code);
+    setView("pairing");
   };
 
   if (isLoading) {
@@ -172,10 +185,33 @@ function App() {
 
       {view === "dashboard" && user && (
         user.role === "teacher" ? (
-          <TeacherDashboard onBack={handleLogout} userName={user.name} userId={user.id} />
+          <TeacherDashboard onBack={handleLogout} userName={user.name} userId={user.id} onSettings={handleOpenSettings} />
         ) : (
           <StudentDashboard studentId={user.id} onBack={handleLogout} userName={user.name} />
         )
+      )}
+
+      {view === "settings" && user?.role === "teacher" && (
+        <TeacherSettings
+          userId={user.id}
+          userName={user.name}
+          onBack={() => setView("dashboard")}
+        />
+      )}
+
+      {view === "pairing" && (
+        <PairingConfirmPage
+          code={pairingCode}
+          onNavigateHome={() => setView("home")}
+          onNavigateDashboard={() => {
+            if (user) {
+              setView("dashboard");
+            } else {
+              setView("login");
+              setRole("student");
+            }
+          }}
+        />
       )}
     </div>
   );

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Users, Bell, ChevronLeft, AlertCircle, BookOpen, CheckCircle } from "lucide-react";
+import { Users, Bell, ChevronLeft, AlertCircle, BookOpen, CheckCircle, Settings } from "lucide-react";
 import {
   COLORS, initData,
   normalizeStudent, normalizeSchedule, normalizeNotification, normalizeAttendance, normalizeRescheduleRequest,
@@ -21,9 +21,10 @@ interface TeacherDashboardProps {
   onBack: () => void;
   userName?: string;
   userId?: number;
+  onSettings?: () => void;
 }
 
-export function TeacherDashboard({ onBack, userName, userId }: TeacherDashboardProps) {
+export function TeacherDashboard({ onBack, userName, userId, onSettings }: TeacherDashboardProps) {
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const [students, setStudents] = useState<Student[]>(initData.students);
   const [schedule, setSchedule] = useState<Schedule[]>(initData.schedule);
@@ -123,6 +124,13 @@ export function TeacherDashboard({ onBack, userName, userId }: TeacherDashboardP
                   {unreadCount}
                 </span>
               )}
+            </button>
+            <button
+              onClick={onSettings}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              title="設定"
+            >
+              <Settings className="w-5 h-5 text-gray-600" />
             </button>
           </div>
         </div>
