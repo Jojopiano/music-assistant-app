@@ -32,40 +32,38 @@ export function TeacherDashboard({ onBack, userName, userId }: TeacherDashboardP
 
   // Load real data from API; fall back to initData only if the API errors
   const { students: apiStudents, loading: studentsLoading, error: studentsError } = useStudents();
-  // teacherId scoping is handled by JWT on the backend; pass undefined for now
-  // userId is available here for future use (e.g. filtering or audit logging)
-  const { lessons: apiLessons, loading: lessonsLoading, error: lessonsError } = useLessons(userId ? { teacherId: userId } as any : undefined);
+  const { lessons: apiLessons, loading: lessonsLoading, error: lessonsError } = useLessons();
   const { notifications: apiNotifications, loading: notificationsLoading, error: notificationsError } = useNotifications();
-  const { records: apiAttendance, loading: attendanceLoading, error: attendanceError } = useAttendance(userId ? { teacherId: userId } as any : undefined);
+  const { records: apiAttendance, loading: attendanceLoading, error: attendanceError } = useAttendance();
   const { requests: apiReschedule, loading: rescheduleLoading, error: rescheduleError } = useRescheduleRequests();
 
   useEffect(() => {
     if (!studentsLoading && studentsError === null) {
-      setStudents(apiStudents.map(normalizeStudent));
+      setStudents((apiStudents ?? []).map(normalizeStudent));
     }
   }, [apiStudents, studentsLoading, studentsError]);
 
   useEffect(() => {
     if (!lessonsLoading && lessonsError === null) {
-      setSchedule(apiLessons.map(normalizeSchedule));
+      setSchedule((apiLessons ?? []).map(normalizeSchedule));
     }
   }, [apiLessons, lessonsLoading, lessonsError]);
 
   useEffect(() => {
     if (!notificationsLoading && notificationsError === null) {
-      setNotifications(apiNotifications.map(normalizeNotification));
+      setNotifications((apiNotifications ?? []).map(normalizeNotification));
     }
   }, [apiNotifications, notificationsLoading, notificationsError]);
 
   useEffect(() => {
     if (!attendanceLoading && attendanceError === null) {
-      setAttendance(apiAttendance.map(normalizeAttendance));
+      setAttendance((apiAttendance ?? []).map(normalizeAttendance));
     }
   }, [apiAttendance, attendanceLoading, attendanceError]);
 
   useEffect(() => {
     if (!rescheduleLoading && rescheduleError === null) {
-      setRescheduleRequests(apiReschedule.map(normalizeRescheduleRequest));
+      setRescheduleRequests((apiReschedule ?? []).map(normalizeRescheduleRequest));
     }
   }, [apiReschedule, rescheduleLoading, rescheduleError]);
 
