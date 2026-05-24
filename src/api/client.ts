@@ -40,7 +40,9 @@ async function request<T>(
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.error || '請求失敗');
+    const err = new Error(data.error || '請求失敗') as Error & { status: number };
+    err.status = response.status;
+    throw err;
   }
 
   return data;

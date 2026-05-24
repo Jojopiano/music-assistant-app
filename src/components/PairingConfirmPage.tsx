@@ -36,7 +36,7 @@ export function PairingConfirmPage({ code: propCode, onNavigateHome, onNavigateD
           if (response.data.valid && response.data.teacher) {
             setTeacher(response.data.teacher);
           } else {
-            setError("此邀請代碼已過期或無效，請聯繫老師取得新的邀請連結");
+            setError("此邀請已過期，請向老師索取新代碼");
           }
         }
       } catch (err) {
@@ -58,8 +58,14 @@ export function PairingConfirmPage({ code: propCode, onNavigateHome, onNavigateD
       if (response.success) {
         setConfirmed(true);
       }
-    } catch (err) {
-      setError((err as Error).message || "配對失敗，請稍後再試");
+    } catch (err: any) {
+      if (err.status === 409 || (err.message && err.message.includes('409'))) {
+        setError('你已經是這位老師的學生了');
+      } else if (err.status === 410 || (err.message && err.message.toLowerCase().includes('expir'))) {
+        setError('此邀請已過期，請向老師索取新代碼');
+      } else {
+        setError('配對失敗，請稍後再試');
+      }
     } finally {
       setConfirming(false);
     }

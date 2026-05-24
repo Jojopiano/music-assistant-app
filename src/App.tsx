@@ -61,7 +61,16 @@ function App() {
           const userData = response.data.user;
           setUser(userData);
           setRole(userData.role);
-          setView("dashboard");
+
+          // 登入後若有 pending invite code，直接進配對頁
+          const pendingCode = getPendingInviteCode();
+          if (pendingCode) {
+            clearPendingInviteCode();
+            setInviteCode(pendingCode);
+            setView("pairing");
+          } else {
+            setView("dashboard");
+          }
         }
       } catch (error) {
         clearToken();
@@ -71,6 +80,27 @@ function App() {
     };
 
     checkAuth();
+  }, []);
+
+  // 解析啟動時的 URL，處理 /invite/XXXXXX 連結
+  useEffect(() => {
+    const inviteMatch = window.location.pathname.match(/^\/invite\/([A-Z0-9]{6})$/i);
+    if (!inviteMatch) return;
+    const code = inviteMatch[1].toUpperCase();
+    // 將 code 存進 sessionStorage，供登入後使用
+    try {
+      sessionStorage.setItem("pending_invite_code", code);
+    } catch {
+      // sessionStorage 不可用時靜默處理
+    }
+    // 清除 URL，避免重新整理後再次觸發
+    window.history.replaceState({}, '', '/');
+    // isLoading 還是 true（checkAuth 尚未完成），此時不能判斷 user 是否登入。
+    // 已登入的情況由 checkAuth useEffect 接手（它會讀 sessionStorage）。
+    // 未登入的情況：等 isLoading 結束後 user 仍為 null，導向登入頁。
+    setRole("student");
+    setInviteCode(code);
+    setView("inviteLanding");
   }, []);
 
   const handleSelectRole = (selectedRole: "teacher" | "student") => {
@@ -104,7 +134,7 @@ function App() {
         if (pendingCode) {
           clearPendingInviteCode();
           setInviteCode(pendingCode);
-          setView("inviteLanding");
+          setView("pairing");
         } else {
           setView("dashboard");
         }
@@ -128,7 +158,7 @@ function App() {
         if (pendingCode) {
           clearPendingInviteCode();
           setInviteCode(pendingCode);
-          setView("inviteLanding");
+          setView("pairing");
         } else {
           setView("dashboard");
         }
@@ -150,6 +180,7 @@ function App() {
     setRole(null);
     setUser(null);
     setPairingCode(undefined);
+    setInviteCode(undefined);
   };
 
   const handleOpenSettings = () => {
