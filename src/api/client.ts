@@ -232,36 +232,36 @@ export interface PairingTeacherInfo {
 
 export const pairingApi = {
   generateInviteCode: () =>
-    request<{ success: boolean; data: { inviteCode: InviteCode } }>('/pairing/invite-code', {
+    request<{ success: boolean; data: { inviteCode: InviteCode } }>('/invite-codes', {
       method: 'POST',
     }),
 
   getInviteCode: () =>
-    request<{ success: boolean; data: { inviteCode: InviteCode | null } }>('/pairing/invite-code'),
+    request<{ success: boolean; data: { inviteCode: InviteCode | null } }>('/invite-codes/me'),
 
   validateInviteCode: (code: string) =>
-    request<{ success: boolean; data: { valid: boolean; teacher: PairingTeacherInfo | null } }>(`/pairing/validate/${code}`),
+    request<{ success: boolean; data: { valid: boolean; teacher: PairingTeacherInfo | null } }>(`/invite-codes/validate/${code}`),
 
   confirmPairing: (code: string) =>
-    request<{ success: boolean; data: { message: string } }>('/pairing/confirm', {
+    request<{ success: boolean; data: { message: string } }>('/relationships', {
       method: 'POST',
       body: JSON.stringify({ code }),
     }),
 
   getStudentList: () =>
-    request<{ success: boolean; data: { students: StudentListItem[] } }>('/pairing/students'),
+    request<{ success: boolean; data: { relationships: StudentListItem[] } }>('/relationships'),
 
-  dissolveRelationship: (studentId: number) =>
-    request<{ success: boolean; data: { message: string } }>(`/pairing/students/${studentId}`, {
+  dissolveRelationship: (relationshipId: number) =>
+    request<{ success: boolean; data: { message: string } }>(`/relationships/${relationshipId}`, {
       method: 'DELETE',
     }),
 
   updateTeacherProfile: (data: Partial<TeacherProfile>) =>
-    request<{ success: boolean; data: { profile: TeacherProfile } }>('/pairing/profile', {
+    request<{ success: boolean; data: { user: TeacherProfile } }>('/users/profile', {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
 
-  getTeacherProfile: () =>
-    request<{ success: boolean; data: { profile: TeacherProfile } }>('/pairing/profile'),
+  getTeacherProfile: (userId: number) =>
+    request<{ success: boolean; data: { user: TeacherProfile } }>(`/users/profile/${userId}`),
 };
