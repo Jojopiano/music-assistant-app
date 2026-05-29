@@ -11,7 +11,8 @@ export function InviteCodeGenerator({ teacherName }: InviteCodeGeneratorProps) {
   const [inviteCode, setInviteCode] = useState<InviteCode | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [codeCopied, setCodeCopied] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
 
@@ -54,8 +55,8 @@ export function InviteCodeGenerator({ teacherName }: InviteCodeGeneratorProps) {
     if (!inviteCode) return;
     try {
       await navigator.clipboard.writeText(inviteCode.code);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setCodeCopied(true);
+      setTimeout(() => setCodeCopied(false), 2000);
     } catch {
       setError("複製失敗，請手動複製");
     }
@@ -66,8 +67,8 @@ export function InviteCodeGenerator({ teacherName }: InviteCodeGeneratorProps) {
     const link = `${window.location.origin}/invite/${inviteCode.code}`;
     try {
       await navigator.clipboard.writeText(link);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
     } catch {
       setError("複製失敗，請手動複製");
     }
@@ -114,7 +115,7 @@ export function InviteCodeGenerator({ teacherName }: InviteCodeGeneratorProps) {
             {/* 代碼顯示 */}
             <div className="bg-purple-light rounded-xl p-6 text-center">
               <div className="text-4xl font-bold text-purple tracking-widest font-mono">
-                {inviteCode.code}
+                {inviteCode.code.slice(0, 3)} {inviteCode.code.slice(3)}
               </div>
               <div className="flex items-center justify-center gap-1 text-sm text-purple-dark mt-2">
                 <Clock className="w-4 h-4" />
@@ -128,7 +129,7 @@ export function InviteCodeGenerator({ teacherName }: InviteCodeGeneratorProps) {
                 onClick={handleCopyCode}
                 className="flex items-center justify-center gap-2 px-4 py-2.5 bg-purple text-white rounded-lg font-medium hover:bg-purple-dark transition-colors"
               >
-                {copied ? (
+                {codeCopied ? (
                   <>
                     <CheckCircle className="w-4 h-4" />
                     已複製
@@ -144,8 +145,17 @@ export function InviteCodeGenerator({ teacherName }: InviteCodeGeneratorProps) {
                 onClick={handleCopyLink}
                 className="flex items-center justify-center gap-2 px-4 py-2.5 bg-teal text-white rounded-lg font-medium hover:bg-teal-dark transition-colors"
               >
-                <Link2 className="w-4 h-4" />
-                複製連結
+                {linkCopied ? (
+                  <>
+                    <CheckCircle className="w-4 h-4" />
+                    已複製
+                  </>
+                ) : (
+                  <>
+                    <Link2 className="w-4 h-4" />
+                    複製連結
+                  </>
+                )}
               </button>
             </div>
 

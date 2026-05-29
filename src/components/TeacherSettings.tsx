@@ -28,7 +28,8 @@ export function TeacherSettings({ userId, userName, onBack }: TeacherSettingsPro
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-4">
           <button
             onClick={onBack}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            aria-label="返回"
+            className="p-3 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>

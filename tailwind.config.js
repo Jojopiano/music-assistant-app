@@ -8,22 +8,22 @@ export default {
     extend: {
       colors: {
         purple: {
-          DEFAULT: '#7F77DD',
+          DEFAULT: '#6860C8',
           light: '#EEEDFE',
           dark: '#3C3489',
         },
         teal: {
-          DEFAULT: '#1D9E75',
+          DEFAULT: '#167A5A',
           light: '#E1F5EE',
           dark: '#085041',
         },
         amber: {
-          DEFAULT: '#BA7517',
+          DEFAULT: '#8A5400',
           light: '#FAEEDA',
           dark: '#633806',
         },
         coral: {
-          DEFAULT: '#D85A30',
+          DEFAULT: '#A83A14',
           light: '#FAECE7',
           dark: '#4A1B0C',
         },

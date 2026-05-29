@@ -172,7 +172,7 @@ export function StudentDashboard({ studentId, onBack, userName }: StudentDashboa
       <header className="bg-white border-b border-gray-100 sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <button onClick={onBack} aria-label="返回" className="p-3 hover:bg-gray-100 rounded-lg transition-colors">
               <ChevronLeft className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-3">
@@ -186,7 +186,8 @@ export function StudentDashboard({ studentId, onBack, userName }: StudentDashboa
 
           <button
             onClick={() => setActiveTab("notifications")}
-            className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            aria-label="通知"
+            className="relative p-3 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <Bell className="w-5 h-5 text-gray-600" />
             {unreadCount > 0 && (
@@ -201,25 +202,28 @@ export function StudentDashboard({ studentId, onBack, userName }: StudentDashboa
       {/* Navigation */}
       <nav className="bg-white border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-4">
-          <div className="flex gap-1 overflow-x-auto">
-            {tabs.map(({ id, label, badge }) => (
-              <button
-                key={id}
-                onClick={() => setActiveTab(id)}
-                className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors relative whitespace-nowrap ${
-                  activeTab === id
-                    ? "border-teal text-teal"
-                    : "border-transparent text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                <span className="text-sm font-medium">{label}</span>
-                {badge > 0 && (
-                  <span className="bg-coral text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {badge}
-                  </span>
-                )}
-              </button>
-            ))}
+          <div className="relative">
+            <div className="flex gap-1 overflow-x-auto">
+              {tabs.map(({ id, label, badge }) => (
+                <button
+                  key={id}
+                  onClick={() => setActiveTab(id)}
+                  className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors relative whitespace-nowrap ${
+                    activeTab === id
+                      ? "border-teal text-teal"
+                      : "border-transparent text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  <span className="text-sm font-medium">{label}</span>
+                  {badge > 0 && (
+                    <span className="bg-coral text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      {badge}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+            <div className="pointer-events-none absolute right-0 top-0 h-full w-10 bg-gradient-to-l from-white to-transparent" />
           </div>
         </div>
       </nav>
@@ -316,7 +320,7 @@ export function StudentDashboard({ studentId, onBack, userName }: StudentDashboa
                 <h2 className="text-xl font-semibold mb-4">過去的課程</h2>
                 <div className="space-y-3">
                   {pastLessons.map(lesson => (
-                    <Card key={lesson.id} style={{ opacity: 0.6, marginBottom: 0 }}>
+                    <Card key={lesson.id} style={{ opacity: 0.6, marginBottom: 0, transition: 'opacity 0.2s' }}>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <CheckCircle className="w-5 h-5 text-gray-400" />
