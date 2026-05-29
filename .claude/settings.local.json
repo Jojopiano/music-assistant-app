@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./node_modules/.bin/tsc --noEmit)",
+      "Bash(node_modules/.bin/tsc --noEmit)",
+      "Bash(npx tsc *)",
+      "Bash(/usr/local/bin/node_modules/.bin/tsc --noEmit)",
+      "Bash(npm install *)",
+      "Bash(node_modules/.bin/tsc --noEmit -p tsconfig.app.json)",
+      "Read(//usr/local/bin/**)",
+      "Read(//usr/bin/**)",
+      "Read(//opt/homebrew/bin/**)",
+      "Bash(git *)",
+      "Bash(npm run *)",
+      "Read(//Users/josefinabuibui/Downloads/**)",
+      "Read(//Users/josefinabuibui/**)"
+    ]
+  }
+}
