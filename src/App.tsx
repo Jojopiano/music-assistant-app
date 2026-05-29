@@ -285,6 +285,7 @@ function App() {
       {view === "pairing" && (
         <PairingConfirmPage
           code={pairingCode}
+          userRole={user?.role}
           onNavigateHome={() => setView("home")}
           onNavigateDashboard={() => {
             if (user) {

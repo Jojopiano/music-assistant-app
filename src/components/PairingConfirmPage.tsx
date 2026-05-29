@@ -7,11 +7,12 @@ import { pairingApi, type PairingTeacherInfo } from "../api/client";
 
 interface PairingConfirmPageProps {
   code?: string;
+  userRole?: string;
   onNavigateHome?: () => void;
   onNavigateDashboard?: () => void;
 }
 
-export function PairingConfirmPage({ code: propCode, onNavigateHome, onNavigateDashboard }: PairingConfirmPageProps) {
+export function PairingConfirmPage({ code: propCode, userRole, onNavigateHome, onNavigateDashboard }: PairingConfirmPageProps) {
   const code = propCode;
 
   const [teacher, setTeacher] = useState<PairingTeacherInfo | null>(null);
@@ -63,6 +64,8 @@ export function PairingConfirmPage({ code: propCode, onNavigateHome, onNavigateD
         setError('你已經是這位老師的學生了');
       } else if (err.status === 410 || (err.message && err.message.toLowerCase().includes('expir'))) {
         setError('此邀請已過期，請向老師索取新代碼');
+      } else if (err.status === 403) {
+        setError('老師帳號無法使用邀請連結配對，請使用學生帳號登入後再試');
       } else {
         setError('配對失敗，請稍後再試');
       }
@@ -207,6 +210,14 @@ export function PairingConfirmPage({ code: propCode, onNavigateHome, onNavigateD
             )}
           </div>
         </Card>
+
+        {/* 老師帳號警告 */}
+        {userRole === 'teacher' && (
+          <div className="flex items-center gap-2 text-amber-dark text-sm p-3 bg-amber-light rounded-lg">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span>您目前以老師帳號登入，無法使用此邀請連結。請用學生帳號登入後再試。</span>
+          </div>
+        )}
 
         {/* 確認按鈕 */}
         <div className="grid grid-cols-2 gap-3">
