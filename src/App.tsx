@@ -109,15 +109,31 @@ function App() {
   };
 
   const handleSocialLogin = async (provider: "apple" | "google") => {
-    const mockName = provider === "apple" ? "Apple 用戶" : "Google 用戶";
-    const mockUser = {
-      id: 1,
-      name: mockName,
-      email: `${provider}@example.com`,
-      role: role || "student",
-    };
-    setUser(mockUser);
-    setView("dashboard");
+    try {
+      // 使用穩定的 mock ID，讓同一裝置每次登入都是同一個帳號
+      const mockId = `mock-${provider}-${role || "student"}-001`;
+      const mockName = provider === "apple" ? "Apple 用戶" : "Google 用戶";
+      const mockEmail = `${mockId.replace(/[^a-z0-9]/g, "")}@${provider}.private`;
+
+      const response = await authApi.oauthLogin(provider, mockId, mockEmail, mockName, role || "student");
+
+      if (response.success) {
+        const { token, user: userData } = response.data ?? {};
+        setToken(token);
+        setUser(userData as any);
+        setRole((userData as any).role);
+        const pendingCode = getPendingInviteCode();
+        if (pendingCode) {
+          clearPendingInviteCode();
+          setInviteCode(pendingCode);
+          setView("pairing");
+        } else {
+          setView("dashboard");
+        }
+      }
+    } catch (error) {
+      alert("社群登入失敗：" + (error as Error).message);
+    }
   };
 
   const handleLogin = async (loggedInRole: "teacher" | "student", email: string, password: string) => {
@@ -126,8 +142,8 @@ function App() {
       if (response.success) {
         const { token, user: userData } = response.data ?? {};
         setToken(token);
-        setUser(userData);
-        setRole(userData.role);
+        setUser(userData as any);
+        setRole((userData as any).role);
 
         // 檢查是否有保留的邀請代碼
         const pendingCode = getPendingInviteCode();
@@ -150,8 +166,8 @@ function App() {
       if (response.success) {
         const { token, user: userData } = response.data ?? {};
         setToken(token);
-        setUser(userData);
-        setRole(userData.role);
+        setUser(userData as any);
+        setRole((userData as any).role);
 
         // 檢查是否有保留的邀請代碼
         const pendingCode = getPendingInviteCode();

@@ -64,6 +64,12 @@ export const authApi = {
 
   me: () =>
     request<{ success: boolean; data: { user: unknown } }>('/auth/me'),
+
+  oauthLogin: (provider: 'apple' | 'google', providerUserId: string, email?: string, name?: string, role?: string) =>
+    request<{ success: boolean; data: { token: string; user: unknown } }>('/auth/oauth', {
+      method: 'POST',
+      body: JSON.stringify({ provider, providerUserId, email, name, role }),
+    }),
 };
 
 // ==================== 學生 API ====================
@@ -198,11 +204,15 @@ export const notificationsApi = {
 
 export interface TeacherProfile {
   id: number;
-  name: string;
-  studio: string;
-  specialty: string;
+  email: string;
+  name: string;           // login name
+  display_name: string;   // shown name / nickname
+  studio_name: string;    // 教室名稱
+  instrument: string;     // 樂器專長
   bio: string;
-  avatarUrl: string | null;
+  avatar_url: string | null;
+  phone: string | null;
+  role: string;
 }
 
 export interface InviteCode {
@@ -269,12 +279,25 @@ export const pairingApi = {
       method: 'DELETE',
     }),
 
-  updateTeacherProfile: (data: Partial<TeacherProfile>) =>
+  // 取得目前登入用戶的個人資料
+  getMyProfile: () =>
+    request<{ success: boolean; data: { user: TeacherProfile } }>('/users/profile'),
+
+  // 取得公開用戶資料（給配對頁用）
+  getTeacherProfile: (userId: number) =>
+    request<{ success: boolean; data: { user: TeacherProfile } }>(`/users/profile/${userId}`),
+
+  // 更新個人資料：傳後端欄位名稱
+  updateTeacherProfile: (data: {
+    displayName?: string;
+    studioName?: string;
+    instrument?: string;
+    bio?: string;
+    avatarUrl?: string;
+    phone?: string;
+  }) =>
     request<{ success: boolean; data: { user: TeacherProfile } }>('/users/profile', {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
-
-  getTeacherProfile: (userId: number) =>
-    request<{ success: boolean; data: { user: TeacherProfile } }>(`/users/profile/${userId}`),
 };
