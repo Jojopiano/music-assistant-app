@@ -58,7 +58,11 @@ function App() {
       try {
         const response = await authApi.me();
         if (response.success && response.data?.user) {
-          const userData = response.data.user;
+          const rawUser = response.data.user as any;
+          const userData = {
+            ...rawUser,
+            name: rawUser.display_name || rawUser.name,
+          };
           setUser(userData);
           setRole(userData.role);
 
@@ -118,10 +122,11 @@ function App() {
       const response = await authApi.oauthLogin(provider, mockId, mockEmail, mockName, role || "student");
 
       if (response.success) {
-        const { token, user: userData } = response.data ?? {};
+        const { token, user: rawUser } = response.data ?? {};
+        const userData = { ...(rawUser as any), name: (rawUser as any).display_name || (rawUser as any).name };
         setToken(token);
         setUser(userData as any);
-        setRole((userData as any).role);
+        setRole(userData.role);
         const pendingCode = getPendingInviteCode();
         if (pendingCode) {
           clearPendingInviteCode();
@@ -140,10 +145,11 @@ function App() {
     try {
       const response = await authApi.login(email, password);
       if (response.success) {
-        const { token, user: userData } = response.data ?? {};
+        const { token, user: rawUser } = response.data ?? {};
+        const userData = { ...(rawUser as any), name: (rawUser as any).display_name || (rawUser as any).name };
         setToken(token);
         setUser(userData as any);
-        setRole((userData as any).role);
+        setRole(userData.role);
 
         // 檢查是否有保留的邀請代碼
         const pendingCode = getPendingInviteCode();
@@ -164,10 +170,11 @@ function App() {
     try {
       const response = await authApi.register(name, email, password, registerRole);
       if (response.success) {
-        const { token, user: userData } = response.data ?? {};
+        const { token, user: rawUser } = response.data ?? {};
+        const userData = { ...(rawUser as any), name: (rawUser as any).display_name || (rawUser as any).name };
         setToken(token);
         setUser(userData as any);
-        setRole((userData as any).role);
+        setRole(userData.role);
 
         // 檢查是否有保留的邀請代碼
         const pendingCode = getPendingInviteCode();
