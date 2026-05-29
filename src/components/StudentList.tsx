@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Users, UserCheck, UserX, Clock, AlertCircle, Loader2, Trash2, XCircle } from "lucide-react";
 import { Card } from "./Card";
 import { Avatar } from "./Avatar";
-import { pairingApi, type StudentListItem } from "../api/client";
+import { pairingApi, normalizeStudentListItem, type StudentListItem } from "../api/client";
 
 interface StudentListProps {
   teacherId?: number;
@@ -22,7 +22,7 @@ export function StudentList({ teacherId }: StudentListProps) {
       setError(null);
       const response = await pairingApi.getStudentList();
       if (response.success) {
-        setStudents(response.data.relationships);
+        setStudents((response.data.relationships ?? []).map(normalizeStudentListItem));
       }
     } catch (err) {
       setError((err as Error).message || "載入學生列表失敗");

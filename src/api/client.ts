@@ -222,6 +222,18 @@ export interface StudentListItem {
   joinedAt: string | null;
 }
 
+export function normalizeStudentListItem(a: any): StudentListItem {
+  return {
+    id: a.related_user_id ?? a.id,
+    relationshipId: a.id,
+    name: a.related_display_name || a.related_name || a.name || '',
+    email: a.related_email || a.email || '',
+    avatar: (a.related_display_name || a.related_name || a.name || '?').charAt(0),
+    status: a.status === 'active' ? 'paired' : 'invited',
+    joinedAt: a.activated_at || a.joined_at || a.joinedAt || null,
+  };
+}
+
 export interface PairingTeacherInfo {
   id: number;
   name: string;
