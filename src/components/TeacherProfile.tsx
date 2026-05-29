@@ -5,6 +5,7 @@ import { pairingApi } from "../api/client";
 
 interface TeacherProfileProps {
   userId?: number;
+  onNameUpdate?: (name: string) => void;
 }
 
 interface FormData {
@@ -28,7 +29,7 @@ const MAX_STUDIO_LENGTH = 50;
 const MAX_SPECIALTY_LENGTH = 30;
 const MAX_BIO_LENGTH = 150;
 
-export function TeacherProfile({ userId }: TeacherProfileProps) {
+export function TeacherProfile({ userId, onNameUpdate }: TeacherProfileProps) {
   const [email, setEmail] = useState<string>("");
   const [formData, setFormData] = useState<FormData>({
     displayName: "",
@@ -160,6 +161,7 @@ export function TeacherProfile({ userId }: TeacherProfileProps) {
       if (response.success) {
         setSuccess(true);
         setTimeout(() => setSuccess(false), 3000);
+        onNameUpdate?.(formData.displayName.trim());
       }
     } catch (err) {
       setSaveError((err as Error).message || "儲存失敗，請稍後再試");

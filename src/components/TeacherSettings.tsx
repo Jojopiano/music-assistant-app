@@ -10,9 +10,10 @@ interface TeacherSettingsProps {
   userId?: number;
   userName?: string;
   onBack: () => void;
+  onNameUpdate?: (name: string) => void;
 }
 
-export function TeacherSettings({ userId, userName, onBack }: TeacherSettingsProps) {
+export function TeacherSettings({ userId, userName, onBack, onNameUpdate }: TeacherSettingsProps) {
   const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
 
   const tabs = [
@@ -64,7 +65,7 @@ export function TeacherSettings({ userId, userName, onBack }: TeacherSettingsPro
 
           {/* Content */}
           <div className="md:col-span-3 space-y-6">
-            {activeTab === "profile" && <TeacherProfile userId={userId} />}
+            {activeTab === "profile" && <TeacherProfile userId={userId} onNameUpdate={onNameUpdate} />}
             {activeTab === "invite" && <InviteCodeGenerator teacherName={userName} />}
             {activeTab === "students" && <StudentList teacherId={userId} />}
           </div>

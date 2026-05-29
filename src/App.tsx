@@ -66,7 +66,7 @@ function App() {
           const pendingCode = getPendingInviteCode();
           if (pendingCode) {
             clearPendingInviteCode();
-            setInviteCode(pendingCode);
+            setPairingCode(pendingCode);
             setView("pairing");
           } else {
             setView("dashboard");
@@ -125,7 +125,7 @@ function App() {
         const pendingCode = getPendingInviteCode();
         if (pendingCode) {
           clearPendingInviteCode();
-          setInviteCode(pendingCode);
+          setPairingCode(pendingCode);
           setView("pairing");
         } else {
           setView("dashboard");
@@ -149,7 +149,7 @@ function App() {
         const pendingCode = getPendingInviteCode();
         if (pendingCode) {
           clearPendingInviteCode();
-          setInviteCode(pendingCode);
+          setPairingCode(pendingCode);
           setView("pairing");
         } else {
           setView("dashboard");
@@ -173,7 +173,7 @@ function App() {
         const pendingCode = getPendingInviteCode();
         if (pendingCode) {
           clearPendingInviteCode();
-          setInviteCode(pendingCode);
+          setPairingCode(pendingCode);
           setView("pairing");
         } else {
           setView("dashboard");
@@ -201,6 +201,10 @@ function App() {
 
   const handleOpenSettings = () => {
     setView("settings");
+  };
+
+  const handleNameUpdate = (newName: string) => {
+    setUser((prev) => prev ? { ...prev, name: newName } : prev);
   };
 
   const handleOpenPairing = (code: string) => {
@@ -274,6 +278,7 @@ function App() {
           userId={user.id}
           userName={user.name}
           onBack={() => setView("dashboard")}
+          onNameUpdate={handleNameUpdate}
         />
       )}
 

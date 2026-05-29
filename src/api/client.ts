@@ -222,6 +222,19 @@ export interface InviteCode {
   remainingHours: number;
 }
 
+// 將後端 DB 原始資料轉換成前端需要的格式
+export function normalizeInviteCode(raw: any): InviteCode {
+  const expiresAt = raw.expires_at || raw.expiresAt || '';
+  const remaining = expiresAt ? Math.max(0, new Date(expiresAt).getTime() - Date.now()) : 0;
+  const totalHours = Math.floor(remaining / (1000 * 60 * 60));
+  return {
+    code: raw.code || '',
+    expiresAt,
+    remainingDays: Math.floor(totalHours / 24),
+    remainingHours: totalHours % 24,
+  };
+}
+
 export interface StudentListItem {
   id: number;
   relationshipId: number;
@@ -246,25 +259,26 @@ export function normalizeStudentListItem(a: any): StudentListItem {
 
 export interface PairingTeacherInfo {
   id: number;
-  name: string;
-  studio: string;
-  specialty: string;
+  name: string;        // display_name || name from backend
+  studio: string;      // studio_name from backend
+  specialty: string;   // instrument from backend
   bio: string;
   avatarUrl: string | null;
 }
 
+// 將後端回傳的老師資料正規化
+export function normalizeTeacherInfo(raw: any): PairingTeacherInfo {
+  return {
+    id: raw.id,
+    name: raw.displayName || raw.display_name || raw.name || '',
+    studio: raw.studioName || raw.studio_name || raw.studio || '',
+    specialty: raw.instrument || raw.specialty || '',
+    bio: raw.bio || '',
+    avatarUrl: raw.avatarUrl || raw.avatar_url || null,
+  };
+}
+
 export const pairingApi = {
-  generateInviteCode: () =>
-    request<{ success: boolean; data: { inviteCode: InviteCode } }>('/invite-codes', {
-      method: 'POST',
-    }),
-
-  getInviteCode: () =>
-    request<{ success: boolean; data: { inviteCode: InviteCode | null } }>('/invite-codes/me'),
-
-  validateInviteCode: (code: string) =>
-    request<{ success: boolean; data: { valid: boolean; teacher: PairingTeacherInfo | null } }>(`/invite-codes/validate/${code}`),
-
   confirmPairing: (code: string) =>
     request<{ success: boolean; data: { message: string } }>('/relationships', {
       method: 'POST',
@@ -300,4 +314,30 @@ export const pairingApi = {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
+
+  // 驗證邀請代碼（正規化 teacher 欄位）
+  validateInviteCode: async (code: string) => {
+    const res = await request<{ success: boolean; data: { valid: boolean; teacher: any; expiresAt?: string } }>(`/invite-codes/validate/${code}`);
+    if (res.success && res.data?.teacher) {
+      res.data.teacher = normalizeTeacherInfo(res.data.teacher);
+    }
+    return res as { success: boolean; data: { valid: boolean; teacher: PairingTeacherInfo | null } };
+  },
+
+  // 計算邀請代碼剩餘時間
+  getInviteCode: async () => {
+    const res = await request<{ success: boolean; data: { inviteCode: any } }>('/invite-codes/me');
+    if (res.success && res.data?.inviteCode) {
+      res.data.inviteCode = normalizeInviteCode(res.data.inviteCode);
+    }
+    return res as { success: boolean; data: { inviteCode: InviteCode | null } };
+  },
+
+  generateInviteCode: async () => {
+    const res = await request<{ success: boolean; data: { inviteCode: any } }>('/invite-codes', { method: 'POST' });
+    if (res.success && res.data?.inviteCode) {
+      res.data.inviteCode = normalizeInviteCode(res.data.inviteCode);
+    }
+    return res as { success: boolean; data: { inviteCode: InviteCode } };
+  },
 };
