@@ -22,7 +22,7 @@ export function StudentList({ teacherId }: StudentListProps) {
       setError(null);
       const response = await pairingApi.getStudentList();
       if (response.success) {
-        setStudents(response.data.students);
+        setStudents(response.data.relationships);
       }
     } catch (err) {
       setError((err as Error).message || "載入學生列表失敗");
@@ -35,13 +35,13 @@ export function StudentList({ teacherId }: StudentListProps) {
     fetchStudents();
   }, [fetchStudents, teacherId]);
 
-  const handleDissolve = async (studentId: number) => {
+  const handleDissolve = async (student: StudentListItem) => {
     try {
-      setDissolvingId(studentId);
+      setDissolvingId(student.id);
       setDissolveError(null);
-      const response = await pairingApi.dissolveRelationship(studentId);
+      const response = await pairingApi.dissolveRelationship(student.relationshipId);
       if (response.success) {
-        setStudents((prev) => prev.filter((s) => s.id !== studentId));
+        setStudents((prev) => prev.filter((s) => s.id !== student.id));
         setConfirmDissolve(null);
       }
     } catch (err) {
@@ -87,7 +87,7 @@ export function StudentList({ teacherId }: StudentListProps) {
               <XCircle className="w-4 h-4" />
             </button>
             <button
-              onClick={() => handleDissolve(student.id)}
+              onClick={() => handleDissolve(student)}
               disabled={dissolvingId === student.id}
               className="p-1.5 text-coral hover:text-coral-dark hover:bg-coral-light rounded-lg transition-colors"
               title="確認解除"

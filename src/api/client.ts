@@ -214,6 +214,7 @@ export interface InviteCode {
 
 export interface StudentListItem {
   id: number;
+  relationshipId: number;
   name: string;
   email: string;
   avatar: string;
