@@ -5,11 +5,12 @@ import { SocialLogin } from "./components/SocialLogin";
 import { TeacherDashboard } from "./components/TeacherDashboard";
 import { StudentDashboard } from "./components/StudentDashboard";
 import { TeacherSettings } from "./components/TeacherSettings";
+import { StudentSettings } from "./components/StudentSettings";
 import { PairingConfirmPage } from "./components/PairingConfirmPage";
 import { InviteLandingPage, getPendingInviteCode, clearPendingInviteCode } from "./components/InviteLandingPage";
 import { authApi, setToken, clearToken, getToken } from "./api/client";
 
-type View = "home" | "socialLogin" | "login" | "dashboard" | "settings" | "pairing" | "inviteLanding";
+type View = "home" | "socialLogin" | "login" | "dashboard" | "settings" | "studentSettings" | "pairing" | "inviteLanding";
 
 interface User {
   id: number;
@@ -276,8 +277,15 @@ function App() {
         user.role === "teacher" ? (
           <TeacherDashboard onBack={handleLogout} userName={user.name} userId={user.id} onSettings={handleOpenSettings} />
         ) : (
-          <StudentDashboard studentId={user.id} onBack={handleLogout} userName={user.name} />
+          <StudentDashboard studentId={user.id} onBack={handleLogout} userName={user.name} onSettings={() => setView("studentSettings")} />
         )
+      )}
+
+      {view === "studentSettings" && user?.role === "student" && (
+        <StudentSettings
+          onBack={() => setView("dashboard")}
+          onNameUpdate={handleNameUpdate}
+        />
       )}
 
       {view === "settings" && user?.role === "teacher" && (
